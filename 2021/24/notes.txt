@@ -1,0 +1,71 @@
+z *= y 14 times
+z /= 26 7 times
+
+first valid solution:
+21611513911181
+
+Digit[0]: 2
+State: {"w":2,"x":1,"y":6,"z":6,"successChecks":1}
+Z: 6
+Digit[1]: 1
+State: {"w":1,"x":1,"y":12,"z":168,"successChecks":2}
+Z: 6,12
+Digit[2]: 6
+State: {"w":6,"x":1,"y":11,"z":4379,"successChecks":3}
+Z: 6,12,11
+Digit[3]: 1
+State: {"w":1,"x":1,"y":12,"z":113866,"successChecks":4}
+Z: 6,12,11,12
+Digit[4]: 1
+State: {"w":1,"x":1,"y":15,"z":2960531,"successChecks":5}
+Z: 6,12,11,12,15
+Digit[5]: 5
+
+digit[5] = zLast-10
+
+State: {"w":5,"x":0,"y":0,"z":113866,"successChecks":5}
+Z: 6,12,11,12
+Digit[6]: 1
+State: {"w":1,"x":1,"y":12,"z":2960528,"successChecks":6}
+Z: 6,12,11,12,12
+Digit[7]: 3
+
+digit[7] = zLast - 9
+
+State: {"w":3,"x":0,"y":0,"z":113866,"successChecks":6}
+Z: 6,12,11,12
+Digit[8]: 9
+
+digit[8] = zLast - 3
+
+State: {"w":9,"x":0,"y":0,"z":4379,"successChecks":6}
+Z: 6,12,11
+Digit[9]: 1
+State: {"w":1,"x":1,"y":6,"z":113860,"successChecks":7}
+Z: 6,12,11,6
+Digit[10]: 1
+
+digit[10] = zLast - 5
+
+State: {"w":1,"x":0,"y":0,"z":4379,"successChecks":7}
+Z: 6,12,11
+Digit[11]: 1
+
+digit[11] = zLast - 10
+
+State: {"w":1,"x":0,"y":0,"z":168,"successChecks":7}
+Z: 6,12
+Digit[12]: 8
+
+digit[12] = zLast - 4
+
+State: {"w":8,"x":0,"y":0,"z":6,"successChecks":7}
+Z: 6
+Digit[13]: 1
+
+digit[13] = zLast - 5
+
+State: {"w":1,"x":0,"y":0,"z":0,"successChecks":7}
+Z: 0
+Done
+

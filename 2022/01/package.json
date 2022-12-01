@@ -3,7 +3,12 @@
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
+  "scripts": {
+    "solve": "npx tsx index.ts input.txt"
+  },
   "dependencies": {
-    "fs": "^0.0.1-security"
+    "@types/node": "^18.11.10",
+    "fs": "^0.0.1-security",
+    "typescript": "^4.9.3"
   }
 }

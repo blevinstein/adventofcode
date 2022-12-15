@@ -1,0 +1,17 @@
+{
+  "name": "day",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "test": "npx tsx part1.ts test_input.txt 10",
+    "solve": "npx tsx part1.ts input.txt 2000000",
+    "test2": "npx tsx part2.ts test_input.txt 20",
+    "solve2": "npx tsx part2.ts input.txt 4000000"
+  },
+  "dependencies": {
+    "fs": "^0.0.1-security",
+    "tsx": "^3.12.1",
+    "typescript": "^4.9.3"
+  }
+}

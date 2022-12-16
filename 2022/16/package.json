@@ -10,6 +10,7 @@
     "solve2": "npx tsx part2.ts input.txt"
   },
   "dependencies": {
+    "@datastructures-js/priority-queue": "^6.1.4",
     "fs": "^0.0.1-security",
     "tsx": "^3.12.1",
     "typescript": "^4.9.3"

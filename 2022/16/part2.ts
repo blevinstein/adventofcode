@@ -1,6 +1,7 @@
 
 import fs from 'fs';
 import PriorityQueue from 'js-priority-queue';
+import { MaxPriorityQueue } from '@datastructures-js/priority-queue';
 
 const maxMinutes = 26;
 
@@ -18,28 +19,26 @@ function valueOf(volcano, moves) {
 
     if (moveA == 'open') {
       if (openValves.has(positionA)) {
-        // Both attempting to open the same valve simultaneously
-        return -1;
+        throw new Error(`Valve ${positionA} is already open`);
       }
       openValves.add(positionA);
       flow += volcano.get(positionA).flowRate;
     } else if (moveA != 'noop') {
       if (!volcano.get(positionA).leadsTo.includes(moveA)) {
-          throw Error(`Valve ${moveA} not reachable from ${positionA}`);
+          throw Error(`Valve ${moveA} not reachable from ${positionA} in ${moves}`);
       }
       positionA = moveA;
     }
 
     if (moveB == 'open') {
       if (openValves.has(positionB)) {
-        // Both attempting to open the same valve simultaneously
-        return -1;
+        throw new Error(`Valve ${positionB} is already open`);
       }
       openValves.add(positionB);
       flow += volcano.get(positionB).flowRate;
     } else if (moveB != 'noop') {
       if (!volcano.get(positionB).leadsTo.includes(moveB)) {
-          throw Error(`Valve ${moveB} not reachable from ${positionB}`);
+          throw Error(`Valve ${moveB} not reachable from ${positionB} in ${moves}`);
       }
       positionB = moveB;
     }
@@ -113,6 +112,19 @@ function interruptableWhile(condition, innerBlock) {
   });
 }
 
+function bestPossible(volcano, moves) {
+  const opened = openValves(moves);
+  const closedFlowRates = Array.from(volcano.entries()).filter(([name, data]) => !opened.includes(name) && data.flowRate > 0).map(([name, data]) => data.flowRate);
+  closedFlowRates.sort((a, b) => b - a);
+  let potentialValue = valueOf(volcano, moves);
+  // NOTE: There is a bug here, we underestimate the possible flow because we assume that you can
+  // only open one valve per minute, but you can actually open two valves per minute.
+  for (let i = 0; i < maxMinutes - moves.length - 1 && i < closedFlowRates.length; ++i) {
+    potentialValue += closedFlowRates[i] * (maxMinutes - moves.length - i - 1);
+  }
+  return potentialValue;
+}
+
 async function main() {
   const rawInput: string = fs.readFileSync(process.argv[2]).toString().trim();
   const volcano = new Map(rawInput.split('\n').map(line => {
@@ -127,15 +139,17 @@ async function main() {
   let bestMoves = null;
   let bestMovesValue = -1;
   let approxValue = 0;
-  const stack = [[]];
-  interruptableWhile(() => stack.length, () => {
-    if (tick++ > 0 && tick % 1e6 == 0) {
-      console.log(`Tick ${tick} stack size ${stack.length} approx value ${approxValue}`);
-      stack.sort((a, b) => Math.random() < 0.5 ? 1 : -1);
+  const scoringFunction = moves => bestPossible(volcano, moves);
+
+  // Use a priority queue to implement A* search
+  const stack = new MaxPriorityQueue(scoringFunction);
+  stack.enqueue([]);
+  await interruptableWhile(() => stack.size() > 0, () => {
+    if (tick++ > 0 && tick % 1e5 == 0) {
+      console.log(`Tick ${tick} stack size ${stack.size()} approx value ${approxValue.toFixed(2)}`);
     }
 
-    // BFS for the first hundred steps, then DFS to limit stack size
-    const moves = tick < 100 ? stack.shift() : stack.pop();
+    const moves = stack.dequeue();
     const [positionA, positionB] = lastPosition(moves);
     const flow = totalFlow(volcano, openValves(moves));
     const [visitedA, visitedB] = recentlyVisited(moves);
@@ -144,22 +158,22 @@ async function main() {
     const doneB = moves.map(m => m[1]).includes('noop');
     const stateToValue = new Map();
 
-    approxValue = 0.01 * value + 0.99 * approxValue;
+    approxValue = 0.01 * scoringFunction(moves) + 0.99 * approxValue;
 
     if (value > bestMovesValue) {
       //console.log(`Found ${value} (${typeof value}) > ${bestMovesValue} (${typeof bestMovesValue})`);
       bestMovesValue = value;
       bestMoves = moves;
-      console.log(`Best moves (${bestMovesValue}, flow ${flow}/${maxFlow}, len ${bestMoves.length}): ${JSON.stringify(bestMoves)}`);
+      console.log(`Best moves (${bestMovesValue}, flow ${flow}/${maxFlow}, len ${bestMoves.length}): ${bestMoves.map(move => move.join('/'))}`);
     }
 
-    if (moves.length == maxMinutes) {
+    if (moves.length == maxMinutes - 1) {
       // Time has run out
       return;
     } else if (flow == maxFlow) {
       // All non-zero valves are open
       return;
-    } else if ((maxMinutes - moves.length) * (maxFlow - flow) + value < bestMovesValue) {
+    } else if ((maxMinutes - moves.length - 1) * (maxFlow - flow) + value < bestMovesValue) {
       // Terminate early, we cannot beat the best solution so far
       return;
     }
@@ -190,9 +204,14 @@ async function main() {
 
     for (let nextMoveA of nextMovesA) {
       for (let nextMoveB of nextMovesB) {
-        if (nextMoveA != 'noop' || nextMoveB != 'noop') {
-          stack.push(moves.concat([[nextMoveA, nextMoveB]]));
-        }
+        // If both players noop, we will not improve on the previous solution
+        if (nextMoveA == 'noop' && nextMoveB == 'noop') continue;
+        // Both players cannot open the same valve at the same time
+        if (positionA == positionB && nextMoveA == 'open' && nextMoveB == 'open') continue;
+        // Arbitrary choice of parity, to avoid exploring solutions twice
+        if (moves.every(([a, b]) => a == b) && nextMoveA < nextMoveB) continue;
+
+        stack.enqueue(moves.concat([[nextMoveA, nextMoveB]]));
       }
     }
   });

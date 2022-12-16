@@ -58,6 +58,21 @@ function totalFlow(volcano, valves) {
   return valves.map(v => volcano.get(v).flowRate).reduce((a, b) => a + b, 0);
 }
 
+function interruptableWhile(condition, innerBlock) {
+  return new Promise((resolve, reject) => {
+    function cycle() {
+      if (condition()) {
+        innerBlock();
+        setImmediate(cycle);
+      } else {
+        resolve();
+      }
+    }
+
+    cycle();
+  });
+}
+
 async function main() {
   const rawInput: string = fs.readFileSync(process.argv[2]).toString().trim();
   const volcano = new Map(rawInput.split('\n').map(line => {
@@ -72,7 +87,8 @@ async function main() {
   let bestMoves = null;
   let bestMovesValue = 0;
   const stack = [[]];
-  while (stack.length) {
+
+  await interruptableWhile(() => stack.length > 0, () => {
     if (tick++ > 0 && tick % 1e6 == 0) {
       console.log(`Tick ${tick} stack size ${stack.length} shuffle`);
       stack.sort((a, b) => Math.random() < 0.5 ? 1 : -1);
@@ -94,13 +110,13 @@ async function main() {
 
     if (moves.length == maxMinutes) {
       // Time has run out
-      continue;
+      return;
     } else if (flow == maxFlow) {
       // All non-zero valves are open
-      continue;
+      return;
     } else if ((maxMinutes - moves.length) * (maxFlow - flow) + value < bestMovesValue) {
       // Terminate early, we cannot beat the best solution so far
-      continue;
+      return;
     }
 
     for (let nextPosition of volcano.get(position).leadsTo) {
@@ -111,7 +127,7 @@ async function main() {
     if (!openValves(moves).includes(position) && volcano.get(position).flowRate > 0) {
       stack.push(moves.concat(['open']));
     }
-  }
+  });
 
   console.log(`Final answer: ${bestMovesValue}`);
 }

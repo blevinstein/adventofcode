@@ -1,6 +1,5 @@
 
 import fs from 'fs';
-import PriorityQueue from 'js-priority-queue';
 import { MaxPriorityQueue } from '@datastructures-js/priority-queue';
 
 const maxMinutes = 26;

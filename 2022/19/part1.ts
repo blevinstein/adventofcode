@@ -2,8 +2,6 @@
 import fs from 'fs';
 import { MaxPriorityQueue } from '@datastructures-js/priority-queue';
 
-const resources = ['ore', 'clay', 'obsidian', 'geode'];
-
 function interruptableWhile(condition, innerBlock) {
   return new Promise(async (resolve, reject) => {
     async function cycle() {
@@ -57,9 +55,18 @@ async function main() {
 
   function maxPossibleGeodes(state) {
     const remainingTime = maxTime - state.time;
-    return remainingTime * (state['geode robot'] || 0) + remainingTime * (remainingTime - 1) / 2;
+    return state['geode'] + remainingTime * (state['geode robot'] || 0) + remainingTime * (remainingTime - 1) / 2;
   }
 
+  function totalRobots(state) {
+    return (state['ore robot'] || 0) + (state['clay robot'] || 0) + (state['obsidian robot'] || 0);
+  }
+
+  function totalResources(state) {
+    return (state['ore'] || 0) + (state['clay'] || 0) + (state['obsidian'] || 0);
+  }
+
+  let qualityLevel = 0;
   for (let blueprint of blueprints) {
     console.log(`Blueprint ${blueprint.id}`);
     for (let recipe of blueprint.recipes) {
@@ -67,25 +74,36 @@ async function main() {
     }
 
     let maxNeeded = {};
-    for (let resource of resources) {
+    for (let resource of ['ore', 'clay', 'obsidian']) {
       const robot = resource + ' robot';
       maxNeeded[robot] = Array.from(blueprint.recipes.values()).map(inputs => {
         const input = inputs.find(i => i.type == resource)
         return input ? input.amount : 0;
       }).reduce((a, b) => Math.max(a, b));
     }
-    console.log(maxNeeded);
+    console.log(`Max needed: ${JSON.stringify(maxNeeded)}`);
 
     let mostGeodes = 0;
+    //const scoringFunction = s => maxPossibleGeodes(s) + totalRobots(s) / 1e3 + totalResources(s) / 1e6;
+    const stateToStr = state => String([
+        state['ore'], state['clay'], state['obsidian'], state['geode'],
+        state['ore robot'], state['clay robot'], state['obsidian robot'], state['geode robot'],
+        state['time']]);
+    const visited = new Set;
     const stack = new MaxPriorityQueue(maxPossibleGeodes);
     stack.enqueue({'ore robot': 1, time: 0});
     let tick = 0;
     let done = false;
     await interruptableWhile(() => stack.size() > 0 && !done, () => {
       const current = stack.dequeue();
+      if (visited.has(stateToStr(current))) {
+        return;
+      } else {
+        visited.add(stateToStr(current));
+      }
 
       if (++tick % 1e5 == 0) {
-        console.log(`Tick ${tick} stack size ${stack.size()}`);
+        console.log(`Tick ${tick} stack size ${stack.size()} sample ${JSON.stringify(current)} score ${maxPossibleGeodes(current)}`);
       }
 
       let totalGeodes = current.geode + current['geode robot'] * (maxTime - current.time);
@@ -109,22 +127,27 @@ async function main() {
       // Option 1: don't produce any new robots
       stack.push(basicState);
       // Option 2: produce a new robot
-      chooseRobot: for (let [output, inputs] of blueprint.recipes.entries()) {
-        const robotState = { ...basicState };
-        if (output != 'geode robot' && current[output] >= maxNeeded[output]) continue;
+      chooseRobot: for (let [robot, inputs] of blueprint.recipes.entries()) {
+        const buildState = { ...basicState };
+
+        // Building any more robots of this type is useless
+        if (robot != 'geode robot' && current[robot] >= maxNeeded[robot]) continue;
+
         for (let { amount, type } of inputs) {
           if (current[type] >= amount) {
-            robotState[type] = (robotState[type] || 0) - amount;
+            buildState[type] = (buildState[type] || 0) - amount;
           } else {
             continue chooseRobot;
           }
         }
-        robotState[output] = (robotState[output] || 0) + 1;
-        stack.push(robotState);
+        buildState[robot] = (buildState[robot] || 0) + 1;
+        stack.push(buildState);
       }
     });
     console.log(`Blueprint ${blueprint.id} score ${mostGeodes}`);
+    qualityLevel += blueprint.id * mostGeodes;
   }
+  console.log(`Quality level ${qualityLevel}`);
 }
 
 main()

@@ -1,0 +1,26 @@
+
+import fs from 'fs';
+
+function range(n) {
+  return Array.from(function*(n) {
+    for (let i = 0; i < n; ++i) yield i;
+  }(n));
+}
+
+async function main() {
+  const grid = fs.readFileSync(process.argv[2]).toString().trim().split('\n').map(line => Array.from(line));
+  const emptyRows = range(grid.length).filter(i => grid[i].every(c => c === '.'));
+  const emptyCols = range(grid[0].length).filter(i => grid.every(row => row[i] === '.'));
+  const galaxies = range(grid.length).flatMap(i => range(grid[0].length).map(j => [i, j]))
+      .filter(([i, j]) => grid[i][j] === '#');
+
+  function distance(a, b) {
+    return Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]) +
+  }
+
+  console.log({grid, emptyRows, emptyCols, galaxies});
+}
+
+main()
+  .then(() => console.log('Done'))
+  .catch(e => console.error(e));

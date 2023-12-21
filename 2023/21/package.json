@@ -1,0 +1,17 @@
+{
+  "name": "day",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "test": "npx node part1.js test_input.txt",
+    "solve": "npx node part1.js input.txt",
+    "test2": "npx node part2.js test_input.txt",
+    "solve2": "npx node part2.js input.txt"
+  },
+  "dependencies": {
+    "datastructures-js": "^13.0.0",
+    "fs": "^0.0.1-security"
+  },
+  "type": "module"
+}

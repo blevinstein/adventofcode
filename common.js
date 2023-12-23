@@ -67,3 +67,7 @@ export function range(...args) {
     for (let i = start; i < endExclusive; ++i) yield i;
   }(start, endExclusive));
 }
+
+export function range2(width, height) {
+  return range(width).flatMap(x => range(height).map(y => [x, y]));
+}

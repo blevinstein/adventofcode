@@ -1,0 +1,12 @@
+{
+  "name": "adventofcode",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+  },
+  "type": "module",
+  "dependencies": {
+    "fs": "^0.0.1-security"
+  }
+}

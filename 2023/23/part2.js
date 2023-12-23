@@ -1,20 +1,6 @@
 
 import fs from 'fs';
-
-function add2(a, b) {
-  return [a[0] + b[0], a[1] + b[1]];
-}
-
-const unit4 = [
-  [1, 0],
-  [0, 1],
-  [-1, 0],
-  [0, -1],
-];
-
-function eq(a, b) {
-  return a.length === b.length && a.every((el, i) => el === b[i]);
-}
+import { add2, unit4, eq } from '../../common.js';
 
 async function main() {
   const grid = fs.readFileSync(process.argv[2]).toString().trim().split('\n').map(line =>

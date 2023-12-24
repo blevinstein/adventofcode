@@ -8,7 +8,7 @@ export function add2(a, b) {
 }
 
 export function sub2(a, b) {
-  return add2(a, mul2(b, -1));
+  return [a[0] - b[0], a[1] - b[1]];
 }
 
 export function add3(a, b) {
@@ -16,11 +16,11 @@ export function add3(a, b) {
 }
 
 export function sub3(a, b) {
-  return add3(a, mul3(b, -1));
+  return [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
 }
 
 export function mul2(a, b) {
-  if (typeof b === 'number') {
+  if (typeof b === 'number' || typeof b === 'bigint') {
     return [a[0] * b, a[1] * b];
   } else {
     return [a[0] * b[0], a[1] * b[1]];
@@ -28,7 +28,7 @@ export function mul2(a, b) {
 }
 
 export function mul3(a, b) {
-  if (typeof b === 'number') {
+  if (typeof b === 'number' || typeof b === 'bigint') {
     return [a[0] * b, a[1] * b, a[2] * b];
   } else {
     return [a[0] * b[0], a[1] * b[1], a[2] * b[2]];
@@ -40,9 +40,8 @@ export function eq(a, b) {
 }
 
 export function dot(a, b) {
-  let result = 0;
-  for (let i = 0; i < Math.min(a.length, b.length); ++i) result += a[i] * b[i];
-  return result;
+  if (a.length !== b.length) throw Error('Dimension mismatch');
+  return a.map((el, i) => el * b[i]).reduce((a, b) => a + b);
 }
 
 export function manhattanDist(a, b) {

@@ -56,6 +56,26 @@ async function main() {
   const vc = mul3(stones.map(stone => stone[1]).reduce((a, b) => add3(a, b)), 1 / stones.length)
       .map(coord => Math.round(coord));
 
+  let bestT;
+  for (let t = 1; t < 1e20; t *= Math.E) {
+    const clusterDist = range(stones.length).flatMap(i => range(i+1, stones.length).map(j => magnitude(sub3(
+            add3(stones[i][0], mul3(stones[i][1], t)),
+            add3(stones[j][0], mul3(stones[j][1], t))))))
+        .reduce((a, b) => a + b);
+    if (!bestT || clusterDist < bestT.clusterDist) {
+      bestT = { t, clusterDist };
+      console.log(bestT);
+    }
+  }
+  console.log(bestT);
+
+  let [ xZero, vZero ] = stones.reduce((a, b) => magnitude(sub3(vc, a[1])) > magnitude(sub3(vc, b[1])) ? a : b);
+  //let [ xZero, vZero ] = stones[0];
+  let xZeroRel = sub3(xZero, xc);
+  let vZeroRel = sub3(vZero, vc);
+  //const tc = Math.round(magnitude(xZeroRel) / -dot(xZeroRel, vZeroRel))
+  const tc = Math.round(bestT.t);
+  console.log({ xc, vc, tc, xZero, vZero, xZeroRel, vZeroRel, dot: dot(xZeroRel, vZeroRel) });
 
   // Generate a bunch of guesses for vs in a hypersphere around vc, then solve for xc based on
   // multiple points, fail when they don't match
@@ -64,9 +84,8 @@ async function main() {
   for (let g of guess4()) {
     // Guess vec3 velocity and t_0, time when the first stone is collided with
     let vg = add3(g.slice(0, 3), vc);
-    let tZero = g[3];
+    let tZero = g[3] + tc;
     if (tZero < 0) continue;
-    let [ xZero, vZero ] = stones[0];
 
     // Solve for xg
     // xg = xi + vi * ti - vg * ti = xi + (vi - vg) * ti
@@ -76,10 +95,10 @@ async function main() {
     for (let [xi, vi] of stones) {
       let xRel = sub3(xi, xg);
       let vRel = sub3(vi, vg);
-      if (cross(xRel, vRel).some(c => c !== 0) || dot(xRel, vRel) > 0) {
+      if (cross(xRel, vRel).some(c => c !== 0) || dot(xRel, vRel) >= 0) {
         // DEBUG
-        if (++counter % 1e6 === 0)
-            console.log({ vg, xg, tZero, xRel, vRel, cross: cross(xRel, vRel) });
+        if (++counter % 1e7 === 0)
+            console.log({ xc, vc, tc, vg, xg, tZero, xZero, vZero, xRel, vRel, dot: dot(xRel, vRel), cross: cross(xRel, vRel) });
         done = false;
         break;
       }

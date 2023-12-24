@@ -16,7 +16,7 @@ export function add3(a, b) {
 }
 
 export function sub3(a, b) {
-  return add2(a, mul3(b, -1));
+  return add3(a, mul3(b, -1));
 }
 
 export function mul2(a, b) {
@@ -39,8 +39,28 @@ export function eq(a, b) {
   return a.length === b.length && a.every((el, i) => el === b[i]);
 }
 
+export function dot(a, b) {
+  let result = 0;
+  for (let i = 0; i < Math.min(a.length, b.length); ++i) result += a[i] * b[i];
+  return result;
+}
+
 export function manhattanDist(a, b) {
   return a.map((el, i) => Math.abs(el - b[i])).reduce((a, b) => a + b);
+}
+
+export function magnitude(v) {
+  return v.map(el => el * el).reduce((a, b) => a + b);
+}
+
+export function cross(a, b) {
+  if (a.length !== 3 || b.length !== 3) throw Error(`Bad input: ${a} cross ${b}`);
+
+  return [
+    a[1] * b[2] - a[2] * b[1],
+    a[2] * b[0] - a[0] * b[2],
+    a[0] * b[1] - a[1] * b[0],
+  ];
 }
 
 export const unit4 = [

@@ -1,0 +1,51 @@
+Arguments: 
+  /opt/homebrew/Cellar/node/21.5.0/bin/node /opt/homebrew/bin/yarn add @datastructures-js
+
+PATH: 
+  /opt/homebrew/Cellar/pyenv-virtualenv/1.2.1/shims:/Users/blevinstein/.pyenv/shims:/opt/homebrew/bin:/opt/homebrew/sbin:/Applications/Postgres.app/Contents/Versions/9.3/bin:/usr/local/heroku/bin:/usr/local/share/npm/bin:/opt/local/bin:/opt/local/sbin:/usr/local/bin:/usr/local/sbin:/Users/blevinstein/bin:/Users/blevinstein/tools:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/go/bin:/Library/Frameworks/Mono.framework/Versions/Current/Commands:/Applications/Postgres.app/Contents/Versions/latest/bin:/opt/homebrew/Cellar/pyenv-virtualenv/1.2.1/shims:/opt/homebrew/bin:/opt/homebrew/sbin:/Applications/Postgres.app/Contents/Versions/9.3/bin:/usr/local/heroku/bin:/usr/local/share/npm/bin:/opt/local/bin:/opt/local/sbin:/usr/local/sbin:/Users/blevinstein/bin:/Users/blevinstein/tools
+
+Yarn version: 
+  1.22.17
+
+Node version: 
+  21.5.0
+
+Platform: 
+  darwin arm64
+
+Trace: 
+  Error: https://registry.yarnpkg.com/@datastructures-js: Request "https://registry.yarnpkg.com/@datastructures-js" returned a 405
+      at params.callback [as _callback] (/opt/homebrew/lib/node_modules/yarn/lib/cli.js:67038:18)
+      at self.callback (/opt/homebrew/lib/node_modules/yarn/lib/cli.js:140883:22)
+      at Request.emit (node:events:519:28)
+      at Request.<anonymous> (/opt/homebrew/lib/node_modules/yarn/lib/cli.js:141855:10)
+      at Request.emit (node:events:519:28)
+      at IncomingMessage.<anonymous> (/opt/homebrew/lib/node_modules/yarn/lib/cli.js:141777:12)
+      at Object.onceWrapper (node:events:633:28)
+      at IncomingMessage.emit (node:events:531:35)
+      at endReadableNT (node:internal/streams/readable:1696:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:82:21)
+
+npm manifest: 
+  {
+    "name": "day",
+    "version": "1.0.0",
+    "main": "index.js",
+    "license": "MIT",
+    "scripts": {
+      "test": "npx node part1.js test_input.txt",
+      "solve": "npx node part1.js input.txt",
+      "test2": "npx node part2.js test_input.txt",
+      "solve2": "npx node part2.js input.txt"
+    },
+    "dependencies": {
+      "fs": "^0.0.1-security"
+    },
+    "type": "module"
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile

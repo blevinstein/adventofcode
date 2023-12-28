@@ -3,6 +3,18 @@
 // TODOs:
 // - Add graph search helper methods? DFS, BFS, A*
 
+Array.prototype.sum = function() { return this.reduce((a, b) => a + b, 0); }
+
+Array.prototype.product = function() { return this.reduce((a, b) => a * b, 1); }
+
+Array.prototype.concatSum = function() { return this.reduce((a, b) => a.concat(b), []); }
+
+Array.prototype.maxBy = function(f) { return this.reduce((a, b) => f(a) > f(b) ? a : b); }
+Array.prototype.max = function() { return this.maxBy(i => i); }
+
+Array.prototype.minBy = function(f) { return this.reduce((a, b) => f(a) < f(b) ? a : b); }
+Array.prototype.min = function() { return this.minBy(i => i); }
+
 export function add2(a, b) {
   return [a[0] + b[0], a[1] + b[1]];
 }

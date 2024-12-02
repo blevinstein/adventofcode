@@ -37,8 +37,8 @@ def main():
   instructions = map(parse_instruction, instruction_data.strip().split('\n'))
 
   # Part 1
-  #print sum(1
-  #    for sample in samples if len(possible_opcodes(sample[0], sample[1][1:], sample[2])) >= 3)
+  print sum(1
+      for sample in samples if len(possible_opcodes(sample[0], sample[1][1:], sample[2])) >= 3)
 
   # Part 2
   opcode_map = {}

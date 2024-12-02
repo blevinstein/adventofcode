@@ -1,9 +1,9 @@
 
 def main():
   # Part 1
-  print ''.join(map(str, get_recipes(890691, 10)))
+  print ''.join(map(str, get_recipes(939601, 10)))
   # Part 2
-  print find_recipes([8,9,0,6,9,1])
+  print find_recipes([9,3,9,6,0,1])
 
 def find_recipes(target):
   recipes = [3, 7]

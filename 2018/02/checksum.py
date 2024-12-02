@@ -4,15 +4,17 @@ def main():
   with open('input.txt', 'r') as f:
     lines = f.readlines()
   # Part 1:
-  #twos = 0
-  #threes = 0
-  #for line in lines:
-  #  freqs = freq_count(line)
-  #  if contains(freqs, 2):
-  #    twos += 1
-  #  if contains(freqs, 3):
-  #    threes += 1
-  #print(twos * threes)
+  twos = 0
+  threes = 0
+  for line in lines:
+    freqs = freq_count(line)
+    if contains(freqs, 2):
+      twos += 1
+    if contains(freqs, 3):
+      threes += 1
+  print(twos * threes)
+
+  # Part 2
   for a in lines:
     for b in lines:
       if a >= b:

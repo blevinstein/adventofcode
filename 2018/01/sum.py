@@ -4,7 +4,7 @@ def main():
     lines = f.readlines()
 
   changes = [int(line) for line in lines]
-  # print(sum(changes))
+  print sum(changes)
   print first_repeat(changes)
 
 

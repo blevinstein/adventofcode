@@ -2,11 +2,7 @@ use std::env;
 use std::fs;
 use std::collections::HashSet;
 
-#[derive(Copy,Clone,Debug,Hash,Eq,PartialEq)]
-struct Pos {
-    x: isize,
-    y: isize,
-}
+use y2024::Pos;
 
 fn trail_ends(grid: &Vec<Vec<usize>>, start: &Pos) -> Vec<Pos> {
     let in_bounds = |p: &Pos| 0 <= p.x && p.x < grid[0].len() as isize && 0 <= p.y && p.y < grid.len() as isize;

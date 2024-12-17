@@ -3,25 +3,7 @@ use std::fs;
 use std::collections::HashMap;
 use std::collections::HashSet;
 
-#[derive(Debug,Eq,PartialEq,Hash,Copy,Clone)]
-struct Pos {
-    x: isize,
-    y: isize,
-}
-
-impl Pos {
-    fn sub(&self, other: &Pos) -> Pos {
-        Pos { x: self.x - other.x, y: self.y - other.y }
-    }
-
-    fn add(&self, other: &Pos) -> Pos {
-        Pos { x: self.x + other.x, y: self.y + other.y }
-    }
-
-    fn mul(&self, scalar: isize) -> Pos {
-        Pos { x: self.x * scalar, y: self.y * scalar }
-    }
-}
+use y2024::Pos;
 
 fn main() {
     let raw_input = fs::read_to_string(env::args().nth(1).expect("Missing filename input"))

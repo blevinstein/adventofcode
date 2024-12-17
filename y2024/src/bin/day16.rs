@@ -4,6 +4,8 @@ use std::collections::VecDeque;
 use std::env;
 use std::fs;
 
+use y2024::Pos;
+
 #[derive(Debug, Eq, PartialEq, Hash, Copy, Clone)]
 enum Dir {
     North,
@@ -38,39 +40,6 @@ impl Dir {
             Dir::South => Dir::West,
             Dir::West => Dir::North,
         }
-    }
-}
-
-#[derive(Debug, Eq, PartialEq, Hash, Copy, Clone)]
-struct Pos {
-    x: isize,
-    y: isize,
-}
-
-impl Pos {
-    fn sub(&self, other: &Pos) -> Pos {
-        Pos {
-            x: self.x - other.x,
-            y: self.y - other.y,
-        }
-    }
-
-    fn add(&self, other: &Pos) -> Pos {
-        Pos {
-            x: self.x + other.x,
-            y: self.y + other.y,
-        }
-    }
-
-    fn mul(&self, scalar: isize) -> Pos {
-        Pos {
-            x: self.x * scalar,
-            y: self.y * scalar,
-        }
-    }
-
-    fn dot(&self, other: &Pos) -> isize {
-        self.x * other.x + self.y * other.y
     }
 }
 

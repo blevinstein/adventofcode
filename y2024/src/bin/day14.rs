@@ -3,41 +3,14 @@ use std::fs;
 use std::io;
 use regex::Regex;
 
-#[derive(Debug, Eq, PartialEq, Hash, Copy, Clone)]
-struct Pos {
-    x: isize,
-    y: isize,
-}
+use y2024::Pos;
 
-impl Pos {
-    fn sub(&self, other: &Pos) -> Pos {
-        Pos {
-            x: self.x - other.x,
-            y: self.y - other.y,
-        }
-    }
-
-    fn add(&self, other: &Pos) -> Pos {
-        Pos {
-            x: self.x + other.x,
-            y: self.y + other.y,
-        }
-    }
-
-    fn mul(&self, scalar: isize) -> Pos {
-        Pos {
-            x: self.x * scalar,
-            y: self.y * scalar,
-        }
-    }
-
-    fn within(&self, bounds: &Pos) -> Pos {
-        let mut tx = self.x % bounds.x;
-        if tx < 0 { tx += bounds.x }
-        let mut ty = self.y % bounds.y;
-        if ty < 0 { ty += bounds.y }
-        Pos { x: tx, y: ty }
-    }
+fn wrap(bounds: &Pos, point: &Pos) -> Pos {
+    let mut tx = point.x % bounds.x;
+    if tx < 0 { tx += bounds.x }
+    let mut ty = point.y % bounds.y;
+    if ty < 0 { ty += bounds.y }
+    Pos { x: tx, y: ty }
 }
 
 struct Robot {
@@ -122,7 +95,7 @@ fn main() {
         .collect();
 
     // Part 1
-    let position_list: Vec<Pos> = robots.iter().map(|robot| robot.at_time(100).within(&bounds)).collect();
+    let position_list: Vec<Pos> = robots.iter().map(|robot| wrap(&bounds, &robot.at_time(100))).collect();
     println!("Safety factor is {}", safety_factor(&position_list, &bounds));
 
     // Part 2 - exploration
@@ -131,7 +104,7 @@ fn main() {
     let mut step = 0;
     let stdin = io::stdin();
     loop {
-        let step_positions: Vec<Pos> = robots.iter().map(|robot| robot.at_time(step).within(&bounds)).collect();
+        let step_positions: Vec<Pos> = robots.iter().map(|robot| wrap(&bounds, &robot.at_time(step))).collect();
         draw(&step_positions, &bounds);
         println!("t={step}");
         stdin.read_line(&mut buffer);
@@ -140,11 +113,11 @@ fn main() {
     */
 
     // Part 2
-    let initial_positions: Vec<Pos> = robots.iter().map(|robot| robot.at_time(0).within(&bounds)).collect();
+    let initial_positions: Vec<Pos> = robots.iter().map(|robot| wrap(&bounds, &robot.at_time(0))).collect();
     let mut min_safety_factor = safety_factor(&initial_positions, &bounds);
     let mut min_safety_step = 0;
     for step in 0..10000 {
-        let step_positions: Vec<Pos> = robots.iter().map(|robot| robot.at_time(step).within(&bounds)).collect();
+        let step_positions: Vec<Pos> = robots.iter().map(|robot| wrap(&bounds, &robot.at_time(step))).collect();
         let step_safety_factor = safety_factor(&step_positions, &bounds);
         if step_safety_factor < min_safety_factor {
             min_safety_step = step;
@@ -152,6 +125,6 @@ fn main() {
         }
     }
     println!("Lowest safety at step {min_safety_step}:");
-    let min_safety_positions: Vec<Pos> = robots.iter().map(|robot| robot.at_time(min_safety_step).within(&bounds)).collect();
+    let min_safety_positions: Vec<Pos> = robots.iter().map(|robot| wrap(&bounds, &robot.at_time(min_safety_step))).collect();
     draw(&min_safety_positions, &bounds);
 }

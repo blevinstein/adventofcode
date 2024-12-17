@@ -2,38 +2,7 @@ use std::collections::HashSet;
 use std::env;
 use std::fs;
 
-#[derive(Debug, Eq, PartialEq, Hash, Copy, Clone)]
-struct Pos {
-    x: isize,
-    y: isize,
-}
-
-impl Pos {
-    fn sub(&self, other: &Pos) -> Pos {
-        Pos {
-            x: self.x - other.x,
-            y: self.y - other.y,
-        }
-    }
-
-    fn add(&self, other: &Pos) -> Pos {
-        Pos {
-            x: self.x + other.x,
-            y: self.y + other.y,
-        }
-    }
-
-    fn mul(&self, scalar: isize) -> Pos {
-        Pos {
-            x: self.x * scalar,
-            y: self.y * scalar,
-        }
-    }
-
-    fn len(&self) -> usize {
-        self.x.abs() as usize + self.y.abs() as usize
-    }
-}
+use y2024::Pos;
 
 const DIRECTIONS: [Pos; 4] = [
     Pos { x: 1, y: 0 },
@@ -113,7 +82,7 @@ fn count_sides(region: &HashSet<Pos>) -> usize {
                 .position(|new_seg|
                     new_side.iter().any(|old_seg|
                             old_seg.1 == new_seg.1
-                            && old_seg.0.sub(&new_seg.0).len() == 1));
+                            && old_seg.0.sub(&new_seg.0).manhattan_dist() == 1));
             match new_segment_index {
                 None => break,
                 Some(i) => new_side.push(side_segments.remove(i)),

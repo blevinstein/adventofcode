@@ -1,7 +1,7 @@
 use std::env;
 use std::fs;
 
-use y2024::Pos;
+use y2024::*;
 
 #[derive(Debug, Eq, PartialEq, Hash, Copy, Clone)]
 enum Space {
@@ -65,17 +65,6 @@ impl Dir {
     }
 }
 
-fn grid_at_mut<'a, T>(grid: &'a mut Vec<Vec<T>>, pos: &Pos) -> &'a mut T {
-    grid.get_mut(pos.y as usize)
-        .expect("y out of bounds")
-        .get_mut(pos.x as usize)
-        .expect("x out of bounds")
-}
-
-fn grid_at<T: Copy>(grid: &Vec<Vec<T>>, pos: &Pos) -> T {
-    grid[pos.y as usize][pos.x as usize]
-}
-
 fn move_robot(grid: &Vec<Vec<Space>>, moves: &Vec<Dir>) -> Vec<Vec<Space>> {
     let mut new_grid: Vec<Vec<Space>> = grid.clone();
 
@@ -96,10 +85,10 @@ fn move_robot(grid: &Vec<Vec<Space>>, moves: &Vec<Dir>) -> Vec<Vec<Space>> {
     for dir in moves {
         let new_robot_pos = robot_pos.add(&dir.unit());
         let mut target_pos = new_robot_pos;
-        while grid_at(&new_grid, &target_pos) == Space::Block {
+        while *grid_at(&new_grid, &target_pos) == Space::Block {
             target_pos = target_pos.add(&dir.unit());
         }
-        match grid_at(&new_grid, &target_pos) {
+        match *grid_at(&new_grid, &target_pos) {
             Space::Wall => (),
             Space::Empty => {
                 // Move the robot
@@ -186,7 +175,7 @@ fn move_robot2(grid: &Vec<Vec<Space>>, moves: &Vec<Dir>) -> Vec<Vec<Space>> {
         //println!("Move {} entities ({:?})", move_positions.len(), move_positions);
         move_positions.sort_by(|a, b| b.dot(&dir.unit()).cmp(&a.dot(&dir.unit())));
         for block_position in move_positions {
-            *grid_at_mut(&mut new_grid, &block_position.add(&dir.unit())) = grid_at(&new_grid, &block_position);
+            *grid_at_mut(&mut new_grid, &block_position.add(&dir.unit())) = *grid_at(&new_grid, &block_position);
             *grid_at_mut(&mut new_grid, &block_position) = Space::Empty;
         }
         robot_pos = new_robot_pos;

@@ -4,7 +4,7 @@ use std::collections::VecDeque;
 use std::env;
 use std::fs;
 
-use y2024::Pos;
+use y2024::*;
 
 #[derive(Debug, Eq, PartialEq, Hash, Copy, Clone)]
 enum Dir {
@@ -41,24 +41,6 @@ impl Dir {
             Dir::West => Dir::North,
         }
     }
-}
-
-fn grid_at_mut<'a, T>(grid: &'a mut Vec<Vec<T>>, pos: &Pos) -> &'a mut T {
-    grid.get_mut(pos.y as usize)
-        .expect("y out of bounds")
-        .get_mut(pos.x as usize)
-        .expect("x out of bounds")
-}
-
-fn grid_at<'a, T>(grid: &'a Vec<Vec<T>>, pos: &Pos) -> &'a T {
-    &grid[pos.y as usize][pos.x as usize]
-}
-
-fn grid_find<T: Eq>(grid: &Vec<Vec<T>>, elem: &T) -> Pos {
-    let y = grid.iter().position(|row| row.contains(elem)).unwrap();
-    let row = &grid[y];
-    let x = row.iter().position(|e| *e == *elem).unwrap();
-    Pos { x: x as isize, y: y as isize }
 }
 
 /*

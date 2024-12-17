@@ -1,0 +1,39 @@
+Program: 2,4,1,2,7,5,4,7,1,3,5,5,0,3,3,0
+
+2 4 BST A
+1 2 BXL 2
+7 5 CDV B
+4 7 BXC
+1 3 BXL 3
+5 5 OUT B
+0 3 ADV 3
+3 0 JNZ 0
+
+
+BST A
+b = a mod 8
+
+BXL 2
+b = b xor 2
+
+CDV B
+c = a >> b
+
+BXC
+b = b xor c
+
+BXL 3
+b = b xor 3
+
+OUT B
+output b mod 8
+
+ADV 3
+a = a >> 3
+
+JNZ 0
+loop if a != 0
+
+
+The loop consumes 3 bits of A at a time. The higher bits of register A can affect the loop outcome.
+

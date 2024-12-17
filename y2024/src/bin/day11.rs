@@ -19,6 +19,7 @@ fn split_digits(stone: &usize) -> Vec<usize> {
     ]
 }
 
+#[allow(dead_code)]
 fn transform(stones: &Vec<usize>) -> Vec<usize> {
     stones
         .iter()
@@ -34,6 +35,7 @@ fn transform(stones: &Vec<usize>) -> Vec<usize> {
         .collect()
 }
 
+#[allow(dead_code)]
 fn transform_n(stones: &Vec<usize>, n: usize) -> Vec<usize> {
     let mut current = stones.clone();
     for _ in 0..n {

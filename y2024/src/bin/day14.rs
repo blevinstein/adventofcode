@@ -1,6 +1,5 @@
 use std::env;
 use std::fs;
-use std::io;
 use regex::Regex;
 
 use y2024::Pos;

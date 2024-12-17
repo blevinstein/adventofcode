@@ -65,6 +65,7 @@ impl Dir {
     }
 }
 
+#[allow(dead_code)]
 fn move_robot(grid: &Vec<Vec<Space>>, moves: &Vec<Dir>) -> Vec<Vec<Space>> {
     let mut new_grid: Vec<Vec<Space>> = grid.clone();
 

@@ -49,8 +49,8 @@ impl Pos {
         self.x * other.x + self.y * other.y
     }
 
-    pub fn manhattan_dist(&self) -> usize {
-        self.x.abs() as usize + self.y.abs() as usize
+    pub fn manhattan_dist(&self) -> isize {
+        self.x.abs() + self.y.abs()
     }
 }
 

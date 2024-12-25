@@ -1,5 +1,7 @@
 use std::collections::HashMap;
 use std::collections::HashSet;
+use rand::seq::IteratorRandom;
+use rand::seq::SliceRandom;
 use std::env;
 use std::fs;
 
@@ -20,33 +22,32 @@ fn build_map(connections: &Vec<Vec<&str>>) -> HashMap<String, HashSet<String>> {
     result
 }
 
-/*
-fn get_largest_subgraph(connections: &HashMap<String, HashSet<String>>) -> usize {
-    let mut result: usize = 0;
+fn get_largest_subgraph(connections: &HashMap<String, HashSet<String>>) -> Vec<String> {
+    let iterations = 1000;
 
-    for start_node in connections {
-        let mut stack: Vec<Vec<&str>> = vec![vec![*start_node]];
-        while !stack.is_empty() {
-            let current = stack.pop();
-            if current.len() > result {
-                result = current.len()
+    let mut rng = rand::thread_rng();
+    let mut result: Vec<String> = Vec::new();
+
+    let all_nodes: Vec<String> = connections.keys().cloned().collect();
+
+    for _ in 0..iterations {
+        let mut subgraph = Vec::from([all_nodes.choose(&mut rng).unwrap().clone()]);
+        'outer: loop {
+            for i in (0..all_nodes.len()).choose_multiple(&mut rng, all_nodes.len()) {
+                if subgraph.iter().all(|old_node| connections.get(old_node).unwrap().contains(&all_nodes[i])) {
+                    subgraph.push(all_nodes[i].clone());
+                    continue 'outer;
+                }
             }
-            let next_options = connections.get(current[0]).filter(|option| {
-                current
-                    .iter()
-                    .all(|current_node| connections.get(current_node).unwrap().contains(option))
-            });
-            for next in next_options {
-                let new_path = current.clone();
-                new_path.push(next);
-                stack.push(new_path);
-            }
+            break;
+        }
+        if subgraph.len() > result.len() {
+            result = dbg!(subgraph);
         }
     }
 
     result
 }
-*/
 
 fn main() {
     let raw_input = fs::read_to_string(env::args().nth(1).expect("Missing filename input"))
@@ -90,5 +91,7 @@ fn main() {
     );
 
     // Part 2
-    //let largest_subgraph = get_largest_subgraph(&graph);
+    let mut largest_subgraph = get_largest_subgraph(&graph);
+    largest_subgraph.sort_by(|a, b| a.cmp(b));
+    println!("Largest subgraph is {}", largest_subgraph.join(","));
 }

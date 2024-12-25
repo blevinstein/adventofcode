@@ -34,6 +34,7 @@ static DIR_KEYPAD_PATHS: Lazy<ExpandMap> = Lazy::new(|| {
 });
 
 // Given a keypad and a code to type, expand the code into directions
+/*
 fn expand(keypad: &ExpandMap, code: &str) -> String {
     let mut result = String::new();
     let mut last_character = 'A';
@@ -45,6 +46,7 @@ fn expand(keypad: &ExpandMap, code: &str) -> String {
 
     result
 }
+*/
 
 fn expand_freq(keypad: &ExpandMap, freq: &FrequencyMap) -> FrequencyMap {
     let mut result: FrequencyMap = HashMap::new();
@@ -72,11 +74,13 @@ fn expand_three(code: &str) -> usize {
     length_of(&c)
 }
 
+/*
 fn expand_three_old(code: &str) -> String {
     let a = dbg!(expand(&*NUM_KEYPAD_PATHS, &code));
     let b = dbg!(expand(&*DIR_KEYPAD_PATHS, &a));
     dbg!(expand(&*DIR_KEYPAD_PATHS, &b))
 }
+*/
 
 fn freq_of(code: &str) -> FrequencyMap {
     let mut result: FrequencyMap = HashMap::new();
@@ -91,7 +95,7 @@ fn freq_of(code: &str) -> FrequencyMap {
 fn expand_more(code: &str) -> usize {
     let mut freq = expand_freq(&*NUM_KEYPAD_PATHS, &freq_of(&format!("A{code}")));
 
-    for step in 0..25 {
+    for _ in 0..25 {
         freq = expand_freq(&*DIR_KEYPAD_PATHS, &freq);
         //println!("Code {code} step {step} length {}", length_of(&freq));
     }

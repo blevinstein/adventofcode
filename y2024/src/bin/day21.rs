@@ -50,14 +50,22 @@ fn expand_three(code: &str) -> String {
     c
 }
 
-fn main() {
-    /*
-     * TODO
-     * 1. Expanding a single value is insufficient, we must expand ALL possible sequences, because
-     *    on further expansion, one may be shorter.
-     * 2. We must prevent movement onto invalid key positions '_'.
-     */
+fn expand_more(code: &str) -> String {
+    // TODO: Instead of keeping result in string form, maintain a HashMap<String, usize> where each
+    // (key, value) indicates that `key` (a two-character sequence) occurs `value` times. Then,
+    // expand using the same rules, while ignoring the length of the sequences. This allows
+    // parallellization and memory efficiency in the computation.
+    let mut result = expand(&*NUM_KEYPAD_PATHS, &code);
 
+    for step in 0..25 {
+        result = expand(&*DIR_KEYPAD_PATHS, &result);
+        println!("Code {code} step {step} length {}", result.len());
+    }
+
+    result
+}
+
+fn main() {
     let raw_input = fs::read_to_string(env::args().nth(1).expect("Missing filename input"))
         .expect("Failed to read input");
 
@@ -65,22 +73,33 @@ fn main() {
 
     let number_re = Regex::new(r"\d+").unwrap();
 
-    let complexity = |code| {
-        dbg!(code);
-        dbg!(number_re
-            .find(code)
-            .unwrap()
-            .as_str()
-            .parse::<usize>()
-            .unwrap())
-            * dbg!(expand_three(code).len())
-    };
-
-    let mut sum = 0;
-    for code in codes {
-        let value = dbg!(complexity(code));
-        sum += value;
+    // Part 1
+    {
+        let complexity = |code| {
+            number_re
+                .find(code)
+                .unwrap()
+                .as_str()
+                .parse::<usize>()
+                .unwrap()
+                * expand_three(code).len()
+        };
+        let sum = codes.iter().map(|code| complexity(code)).reduce(|acc, el| acc + el).unwrap();
+        println!("Sum of complexity is {sum}");
     }
-    //let sum = codes.iter().map(|code| complexity(code)).reduce(|acc, el| acc + el).unwrap();
-    println!("Sum of complexity is {sum}");
+
+    // Part 2
+    {
+        let complexity = |code| {
+            number_re
+                .find(code)
+                .unwrap()
+                .as_str()
+                .parse::<usize>()
+                .unwrap()
+                * expand_more(code).len()
+        };
+        let sum = codes.iter().map(|code| complexity(code)).reduce(|acc, el| acc + el).unwrap();
+        println!("Sum of complexity is {sum}");
+    }
 }

@@ -80,8 +80,8 @@ fn count_bits(number: usize) -> usize {
 
 const MASK: usize = 0x1FFFFFFFFFFF;
 //const MASK: usize = 0xF;
-fn count_errors(gates: &Vec<Gate>, times: usize) -> usize {
-    let mut errors = 0;
+fn find_errors(gates: &Vec<Gate>, times: usize) -> usize {
+    let mut error_mask = 0;
     for _ in 0..times {
         let x: usize = rand::thread_rng().gen::<usize>() & MASK;
         let y: usize = rand::thread_rng().gen::<usize>() & MASK;
@@ -93,10 +93,9 @@ fn count_errors(gates: &Vec<Gate>, times: usize) -> usize {
             return usize::MAX;
         }
         let z = get_number(&final_state.unwrap(), 'z');
-        errors += count_bits(z ^ (x + y))
-        //errors += count_bits(z ^ (x & y))
+        error_mask |= z ^ (x + y);
     }
-    errors
+    error_mask
 }
 
 fn get_number(state: &HashMap<String, bool>, prefix: char) -> usize {
@@ -170,9 +169,17 @@ fn main() {
      * - Look for errors in circuits which are connected to the particular bits with output errors
      */
 
-    while count_errors(&modified_gates, times) > 0 {
-        let mut best_swap = (0, 0);
-        let mut best_errors = count_errors(&modified_gates, times);
+    loop {
+        let error_mask = find_errors(&modified_gates, times);
+        if error_mask == 0 { break; }
+
+        let error_outputs: Vec<String> = to_bits(error_mask).iter().enumerate()
+            .filter(|(i, b)| **b)
+            .map(|(i, b)| format!("z{:02}", i))
+            .collect();
+        dbg!(error_outputs);
+
+        /*
         for i in 0..modified_gates.len() {
             if i % 10 == 0 {
                 println!("Gate {}/{}... (best_errors={})", i, modified_gates.len(), best_errors);
@@ -190,10 +197,10 @@ fn main() {
                 }
             }
         }
-        println!("Swapping {} and {} outputs (errors={})", modified_gates[best_swap.0].out, modified_gates[best_swap.1].out, best_errors);
-        swapped.push(modified_gates[best_swap.0].out.clone());
-        swapped.push(modified_gates[best_swap.1].out.clone());
-        modified_gates = swap(&modified_gates, &modified_gates[best_swap.0].out, &modified_gates[best_swap.1].out);
+        */
+
+        println!("Mask: {error_mask:#016x}");
+        break;
     }
     swapped.sort();
     println!("Sorted swapped list is {}", swapped.join(","));

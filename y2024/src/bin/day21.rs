@@ -25,10 +25,10 @@ static NUM_KEYPAD_PATHS: Lazy<ExpandMap> = Lazy::new(|| {
 
 static DIR_KEYPAD_PATHS: Lazy<ExpandMap> = Lazy::new(|| {
     HashMap::from([
-        ('A', HashMap::from([('^', "<A"), ('<', "v<<A"), ('v', "v<A"), ('>', "vA"), ('A', "A")])),
+        ('A', HashMap::from([('^', "<A"), ('<', "v<<A"), ('v', "<vA"), ('>', "vA"), ('A', "A")])),
         ('^', HashMap::from([('^', "A"), ('<', "v<A"), ('v', "vA"), ('>', "v>A"), ('A', ">A")])),
         ('<', HashMap::from([('^', ">^A"), ('<', "A"), ('v', ">A"), ('>', ">>A"), ('A', ">>^A")])),
-        ('v', HashMap::from([('^', "^A"), ('<', "<A"), ('v', "A"), ('>', ">A"), ('A', ">^A")])),
+        ('v', HashMap::from([('^', "^A"), ('<', "<A"), ('v', "A"), ('>', ">A"), ('A', "^>A")])),
         ('>', HashMap::from([('^', "<^A"), ('<', "<<A"), ('v', "<A"), ('>', "A"), ('A', "^A")])),
     ])
 });
@@ -93,7 +93,7 @@ fn expand_more(code: &str) -> usize {
 
     for step in 0..25 {
         freq = expand_freq(&*DIR_KEYPAD_PATHS, &freq);
-        println!("Code {code} step {step} length {}", length_of(&freq));
+        //println!("Code {code} step {step} length {}", length_of(&freq));
     }
 
     length_of(&freq)
@@ -133,7 +133,7 @@ fn main() {
                 .unwrap()
                 * expand_more(code)
         };
-        let sum = codes.iter().map(|code| complexity(code)).reduce(|acc, el| acc + el).unwrap();
+        let sum = codes.iter().map(|code| dbg!(complexity(code))).reduce(|acc, el| acc + el).unwrap();
         println!("Sum of complexity is {sum}");
     }
 }

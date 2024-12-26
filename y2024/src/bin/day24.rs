@@ -1,8 +1,11 @@
 use rand::Rng;
+use rand::distributions::WeightedIndex;
+use rand::distributions::Distribution;
 use regex::Regex;
 use std::collections::HashMap;
 use std::env;
 use std::fs;
+use itertools::Itertools;
 
 #[derive(Debug, Eq, PartialEq, Hash, Copy, Clone)]
 enum Op {
@@ -35,6 +38,89 @@ struct Gate {
     operands: (String, String),
     op: Op,
     out: String,
+}
+
+const GENE_LEN: usize = 8;
+//TEST: const GENE_LEN: usize = 4;
+
+type Gene = [usize; GENE_LEN];
+
+fn sexual_reproduction(a: &Gene, b: &Gene) -> Gene {
+	let mut rng = rand::thread_rng();
+    let cut = rng.gen_range(1..(a.len()-1));
+	let mut result: Gene = [0; GENE_LEN];
+	result[..cut].clone_from_slice(&a[..cut]);
+	result[cut..].clone_from_slice(&b[cut..]);
+	result
+}
+
+fn mutate(orig: &Gene, max_index: usize) -> Gene {
+	let mut rng = rand::thread_rng();
+    let index = rng.gen_range(0..orig.len());
+	let value = rng.gen_range(0..max_index);
+	let mut result = orig.clone();
+	result[index] = value;
+	result
+}
+
+type Pop = Vec<Gene>;
+
+fn rand_gene(max_index: usize) -> Gene {
+	let mut rng = rand::thread_rng();
+	let mut result: Gene = [0; GENE_LEN];
+	for i in 0..GENE_LEN {
+        result[i] = rng.gen_range(0..max_index);
+	}
+	result
+}
+
+fn is_valid(gene: &Gene) -> bool {
+    for i in 1..GENE_LEN {
+        for j in 0..i {
+            if gene[i] == gene[j] {
+                return false;
+            }
+        }
+    }
+    true
+}
+
+fn evolve(gates: &Vec<Gate>, pop: &Pop, max_index: usize) -> Pop {
+	let mut new_pop: Pop = Vec::new();
+
+    let mut fitness_scores: Vec<f64> = Vec::new();
+    for gene in pop {
+        fitness_scores.push(fitness(gates, gene));
+    }
+    let dist = WeightedIndex::new(&fitness_scores).unwrap();
+    let mut rng = rand::thread_rng();
+
+    let max_fitness = fitness_scores.iter().fold(0f64, |acc, el| f64::max(acc, *el));
+    let max_fitness_index = fitness_scores.iter().position(|score| *score == max_fitness).unwrap();
+    let avg_fitness = fitness_scores.iter().sum::<f64>() / fitness_scores.len() as f64;
+    println!("Evolving, fitness is max {:.4} {:?} / avg {:.4} / sample {:?}", max_fitness, pop[max_fitness_index], avg_fitness, pop[1]);
+
+    new_pop.push(pop[max_fitness_index].clone());
+
+	while new_pop.len() < pop.len() {
+        let nonce = rand::random::<f64>();
+        let mut new_gene = if nonce < 0.7 {
+            sexual_reproduction(&pop[dist.sample(&mut rng)], &pop[dist.sample(&mut rng)])
+        } else if nonce < 0.8 {
+            pop[dist.sample(&mut rng)].clone()
+        } else {
+            rand_gene(max_index)
+        };
+
+		if rand::random::<f64>() < 0.4 {
+			new_gene = mutate(&new_gene, max_index);
+		}
+
+        if is_valid(&new_gene) {
+            new_pop.push(new_gene);
+        }
+	}
+	new_pop
 }
 
 fn simulate<'a>(inputs: &HashMap<String, bool>, gates: &'a Vec<Gate>) -> Option<HashMap<String, bool>> {
@@ -79,9 +165,9 @@ fn count_bits(number: usize) -> usize {
 }
 
 const MASK: usize = 0x1FFFFFFFFFFF;
-//const MASK: usize = 0xF;
-fn find_errors(gates: &Vec<Gate>, times: usize) -> usize {
-    let mut error_mask = 0;
+//TEST: const MASK: usize = 0xF;
+fn find_errors(gates: &Vec<Gate>, times: usize) -> isize {
+    let mut error_count: isize = 0;
     for _ in 0..times {
         let x: usize = rand::thread_rng().gen::<usize>() & MASK;
         let y: usize = rand::thread_rng().gen::<usize>() & MASK;
@@ -90,7 +176,26 @@ fn find_errors(gates: &Vec<Gate>, times: usize) -> usize {
         let inputs: HashMap<String, bool> = x_inputs.iter().chain(y_inputs.iter()).cloned().collect();
         let final_state = simulate(&inputs, &gates);
         if final_state.is_none() {
-            return usize::MAX;
+            return isize::MAX;
+        }
+        let z = get_number(&final_state.unwrap(), 'z');
+        error_count += count_bits(z ^ (x + y)) as isize;
+        //TEST: error_count += count_bits(z ^ (x & y)) as isize;
+    }
+    error_count
+}
+
+fn get_error_mask(gates: &Vec<Gate>, times: usize) -> usize {
+    let mut error_mask: usize = 0;
+    for _ in 0..times {
+        let x: usize = rand::thread_rng().gen::<usize>() & MASK;
+        let y: usize = rand::thread_rng().gen::<usize>() & MASK;
+        let x_inputs: Vec<(String, bool)> = to_bits(x).iter().enumerate().map(|(i, b)| (format!("x{:02}", i), *b)).collect();
+        let y_inputs: Vec<(String, bool)> = to_bits(y).iter().enumerate().map(|(i, b)| (format!("y{:02}", i), *b)).collect();
+        let inputs: HashMap<String, bool> = x_inputs.iter().chain(y_inputs.iter()).cloned().collect();
+        let final_state = simulate(&inputs, &gates);
+        if final_state.is_none() {
+            return MASK;
         }
         let z = get_number(&final_state.unwrap(), 'z');
         error_mask |= z ^ (x + y);
@@ -108,20 +213,60 @@ fn get_number(state: &HashMap<String, bool>, prefix: char) -> usize {
     bits.iter().enumerate().map(|(i, (_k, v))| if *v { 1 } else { 0 } << i).sum()
 }
 
-fn swap(gates: &Vec<Gate>, a: &str, b: &str) -> Vec<Gate> {
-    gates.iter().map(|gate| if gate.out == *a {
-        Gate {
-            out: b.to_string(),
-            ..gate.clone()
+fn swap(gates: &Vec<Gate>, gene: &Gene) -> Vec<Gate> {
+    let mut new_gates = gates.clone();
+
+    for (i, j) in gene.iter().tuples() {
+        let t = new_gates[*i].out.clone();
+        new_gates[*i].out = new_gates[*j].out.clone();
+        new_gates[*j].out = t;
+    }
+
+    new_gates
+}
+
+fn fitness(gates: &Vec<Gate>, gene: &Gene) -> f64 {
+    const TIMES: usize = 10;
+    let swapped_gates = swap(&gates, &gene);
+    1.1f64.powf(-1f64 * find_errors(&swapped_gates, TIMES) as f64 / TIMES as f64)
+}
+
+fn genetic_algorithm(gates: &Vec<Gate>, max_index: usize) -> Gene {
+    const POP_SIZE: usize = 100;
+    let mut pop: Pop = Vec::new();
+    println!("Creating initial population...");
+
+    // Bootstrap population
+    /*
+    pop.push([82, 33, 190, 38, 178, 155, 195, 79]);
+    pop.push([133, 58, 44, 162, 49, 62, 143, 163]);
+    pop.push([133, 58, 148, 7, 33, 62, 163, 82]);
+    pop.push([0, 38, 133, 102, 32, 127, 92, 114]);
+    */
+
+    while pop.len() < POP_SIZE {
+        let new_gene = rand_gene(max_index);
+        //dbg!(&new_gene);
+        if is_valid(&new_gene) {
+            pop.push(new_gene);
         }
-    } else if gate.out == *b {
-        Gate {
-            out: a.to_string(),
-            ..gate.clone()
+    }
+
+    let mut step = 0;
+    loop {
+        // Check for solution
+        if let Some(gene) = pop.iter().find(|gene| fitness(gates, gene) == 1f64) {
+            return *gene
         }
-    } else {
-        gate.clone()
-    }).collect()
+
+        step += 1;
+        if step % 1 == 0 {
+            println!("Evolving generation {step}...");
+        }
+
+        // Evolve the pop
+        pop = evolve(gates, &pop, max_index);
+    }
 }
 
 fn main() {
@@ -159,49 +304,34 @@ fn main() {
     println!("z is {z}");
 
     // Part 2
-    let mut modified_gates = gates.clone();
-    let mut swapped: Vec<String> = Vec::new();
-
-    let times = 10;
-
-    /*
-     * TODO:
-     * - Look for errors in circuits which are connected to the particular bits with output errors
-     */
-
+    let error_mask = get_error_mask(&gates, 100);
+    //println!("Error mask is {error_mask:#015x}");
+    let z_errors: Vec<String> = to_bits(error_mask).iter()
+        .enumerate()
+        .filter(|(_, b)| **b)
+        .map(|(i, _)| format!("z{:02}", i))
+        .collect();
+    //println!("Z errors are {}", z_errors.join(","));
+    let mut all_errors: Vec<String> = z_errors.clone();
     loop {
-        let error_mask = find_errors(&modified_gates, times);
-        if error_mask == 0 { break; }
-
-        let error_outputs: Vec<String> = to_bits(error_mask).iter().enumerate()
-            .filter(|(i, b)| **b)
-            .map(|(i, b)| format!("z{:02}", i))
-            .collect();
-        dbg!(error_outputs);
-
-        /*
-        for i in 0..modified_gates.len() {
-            if i % 10 == 0 {
-                println!("Gate {}/{}... (best_errors={})", i, modified_gates.len(), best_errors);
-            }
-            if swapped.contains(&modified_gates[i].out) { continue; }
-            for j in 0.. modified_gates.len() {
-                if i <= j { continue; }
-                if swapped.contains(&modified_gates[j].out) { continue; }
-
-                let swapped_gates = swap(&modified_gates, &modified_gates[i].out, &modified_gates[j].out);
-                let swapped_errors = count_errors(&swapped_gates, times);
-                if swapped_errors < best_errors {
-                    best_errors = swapped_errors;
-                    best_swap = (i, j);
-                }
+        let mut done = true;
+        for gate in &gates {
+            if all_errors.contains(&gate.out)
+                    && !all_errors.contains(&gate.operands.0)
+                    && !all_errors.contains(&gate.operands.1) {
+                all_errors.push(gate.operands.0.clone());
+                all_errors.push(gate.operands.1.clone());
+                done = false;
             }
         }
-        */
-
-        println!("Mask: {error_mask:#016x}");
-        break;
+        if done { break; }
     }
-    swapped.sort();
-    println!("Sorted swapped list is {}", swapped.join(","));
+    //println!("Possible errors are {}", all_errors.join(","));
+    let all_error_indexes: Vec<_> = all_errors.iter().flat_map(|error_out| gates.iter().position(|gate| gate.out == *error_out)).collect();
+    println!("Possible error indexes ({} / {}) are {:?}", all_error_indexes.len(), gates.len(), all_error_indexes);
+
+    let success_gene = genetic_algorithm(&gates, gates.len());
+    let mut outputs: Vec<&String> = success_gene.iter().map(|i| &gates[*i].out).collect();
+    outputs.sort_by(|a, b| a.cmp(b));
+    println!("solution is {}", outputs.iter().join(","));
 }

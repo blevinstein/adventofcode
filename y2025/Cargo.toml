@@ -1,0 +1,9 @@
+[package]
+name = "y2025"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+itertools = "0.14.0"
+rand = "0.9.2"
+regex = "1.12.2"

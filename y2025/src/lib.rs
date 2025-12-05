@@ -17,6 +17,12 @@ pub fn grid_find<T: Eq>(grid: &Vec<Vec<T>>, elem: &T) -> Pos {
     Pos { x: x as isize, y: y as isize }
 }
 
+pub fn grid_coords(width: usize, height: usize) -> Vec<Pos> {
+  (0..height)
+      .flat_map(|y| (0..width).map(|x| Pos { x: x as isize, y: y as isize }).collect::<Vec<Pos>>())
+      .collect()
+}
+
 #[derive(Debug, Eq, PartialEq, Hash, Copy, Clone)]
 pub struct Pos {
     pub x: isize,

@@ -2,6 +2,9 @@
 **/package-lock.json
 yarn.lock
 .DS_Store
+.claude/
 
 **/target
 **/input.txt
+**/input2.txt
+a.out

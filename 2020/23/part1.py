@@ -1,7 +1,7 @@
 
 def main():
   #cups = [int(c) for c in '389125467']
-  cups = [int(c) for c in '589174263']
+  cups = [int(c) for c in '974618352']
 
   min_cup = min(cups)
   max_cup = max(cups)

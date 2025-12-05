@@ -4,6 +4,7 @@ import re
 LETTER = re.compile(r"\"(\w)\"")
 
 def main():
+  #with open('input.txt') as f:
   with open('input2.txt') as f:
     rules_input, messages_input = f.read().split('\n\n')
 

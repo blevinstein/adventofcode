@@ -7,7 +7,7 @@ def next_value(lst):
 
 def main():
   #input = [0,3,6]
-  input = [9,19,1,6,0,5,4]
+  input = [2,0,6,12,1,3]
 
   last_seen = {}
 

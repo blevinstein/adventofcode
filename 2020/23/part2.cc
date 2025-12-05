@@ -25,7 +25,7 @@ void print_cups(const Cup& current_cup, const long long cups = 10) {
 
 int main(int argc, char **argv) {
   //string input("389125467");
-  string input = "589174263";
+  string input = "974618352";
   cout << "Initializing cups" << endl << flush;
   Cup *cups = new Cup[CUPS];
   Cup **cups_by_label = new Cup*[CUPS+1];

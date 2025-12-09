@@ -8,7 +8,7 @@ use std::collections::HashMap;
 
 use y2025::Pos;
 
-fn contains(point: &Pos, points_on_edges: &HashSet<Pos>, vertical_edges: &Vec<&Vec<Pos>>, cache: &mut HashMap<Pos, bool>) -> bool {
+fn contains(point: &Pos, points_on_edges: &HashSet<Pos>, edges_by_y: &HashMap<isize, Vec<&Vec<Pos>>>, cache: &mut HashMap<Pos, bool>) -> bool {
   // Check cache first
   if let Some(&result) = cache.get(point) {
     return result;
@@ -17,16 +17,11 @@ fn contains(point: &Pos, points_on_edges: &HashSet<Pos>, vertical_edges: &Vec<&V
   // First check if the point is exactly on an edge (O(1) lookup)
   let result = points_on_edges.contains(point)
   // Second, use a "raycasting" algorithm to check for interior points
-  || vertical_edges.iter()
-      .filter(|edge|
-          // If the edge is vertical
-          // and a line from (-infinity, point.y) to `point` crosses the edge
-          edge[0].x < point.x
-          && min(edge[0].y, edge[1].y) <= point.y
-          && max(edge[0].y, edge[1].y) > point.y)
-      // then we count this as an intersection.
-      // If the number of intersections is odd, we are inside the polygon
-      .count() % 2 == 1;
+  || edges_by_y.get(&point.y)
+      .map(|edges| edges.iter()
+          .filter(|edge| edge[0].x < point.x)
+          .count() % 2 == 1)
+      .unwrap_or(false);
 
   // Store in cache
   cache.insert(*point, result);
@@ -124,6 +119,18 @@ fn main() {
       .filter(|edge| edge[0].x == edge[1].x)
       .collect();
 
+  // Map each critical y to the vertical edges that span it
+  let mut edges_by_y: HashMap<isize, Vec<&Vec<Pos>>> = HashMap::new();
+  for &y in critical_ys.iter() {
+    let relevant_edges: Vec<&Vec<Pos>> = vertical_edges.iter()
+        .filter(|edge|
+            min(edge[0].y, edge[1].y) <= y
+            && max(edge[0].y, edge[1].y) > y)
+        .copied()
+        .collect();
+    edges_by_y.insert(y, relevant_edges);
+  }
+
   // Cache for contains() results
   let mut contains_cache: HashMap<Pos, bool> = HashMap::new();
 
@@ -131,35 +138,38 @@ fn main() {
   let mut coords: Vec<Pos> = vec![];
   for i in 0..size {
     println!("Progress {i}/{size}...");
-    'outer: for j in 0..size {
+    'outer: for j in i+1..size {
+      // Early exit: skip if potential area is not larger than current max
+      let area = ((input[i].x - input[j].x).abs() + 1) * ((input[i].y - input[j].y).abs() + 1);
+      if area <= max_area {
+        continue;
+      }
+
       // Ensure that all edge points are within the loop; this will ensure that all interior points
       // are as well
       let min_corner = Pos { x: min(input[i].x, input[j].x), y: min(input[i].y, input[j].y) };
       let max_corner = Pos { x: max(input[i].x, input[j].x), y: max(input[i].y, input[j].y) };
-      for x in min_corner.x..max_corner.x {
+      for x in min_corner.x..=max_corner.x {
         if !critical_xs.contains(&x) {
           continue;
         }
-        if !contains(&Pos { x: x, y: min_corner.y }, &points_on_edges, &vertical_edges, &mut contains_cache)
-            || !contains(&Pos { x: x, y: max_corner.y }, &points_on_edges, &vertical_edges, &mut contains_cache) {
+        if !contains(&Pos { x: x, y: min_corner.y }, &points_on_edges, &edges_by_y, &mut contains_cache)
+            || !contains(&Pos { x: x, y: max_corner.y }, &points_on_edges, &edges_by_y, &mut contains_cache) {
           continue 'outer;
         }
       }
-      for y in min_corner.y..max_corner.y {
+      for y in min_corner.y..=max_corner.y {
         if !critical_ys.contains(&y) {
           continue;
         }
-        if !contains(&Pos { x: min_corner.x, y: y }, &points_on_edges, &vertical_edges, &mut contains_cache)
-            || !contains(&Pos { x: max_corner.x, y: y }, &points_on_edges, &vertical_edges, &mut contains_cache) {
+        if !contains(&Pos { x: min_corner.x, y: y }, &points_on_edges, &edges_by_y, &mut contains_cache)
+            || !contains(&Pos { x: max_corner.x, y: y }, &points_on_edges, &edges_by_y, &mut contains_cache) {
           continue 'outer;
         }
       }
 
-      let area = (input[i].x - input[j].x + 1) * (input[i].y - input[j].y + 1);
-      if area > max_area {
-        max_area = area;
-        coords = vec![input[i], input[j]];
-      }
+      max_area = area;
+      coords = vec![input[i], input[j]];
     }
   }
 

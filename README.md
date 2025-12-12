@@ -18,7 +18,7 @@ Advent of Code is an annual coding challenge with daily programming puzzles thro
 | 2022 | 📜 TypeScript, 📜 JavaScript | ✅ Completed |
 | 2023 | 📜 TypeScript, 📜 JavaScript | ✅ Completed |
 | 2024 | 🦀 Rust | ✅ Completed |
-| 2025 | 🦀 Rust | Partially Completed |
+| 2025 | 🦀 Rust | ✅ Completed |
 
 ## 🌟 Repository Structure
 

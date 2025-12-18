@@ -89,6 +89,6 @@ public class Marbles {
   }
 
   public static void main(String[] args) {
-    System.out.println(max(marbleGame(441, 7103200)));
+    System.out.println(max(marbleGame(413, 7108200)));
   }
 }

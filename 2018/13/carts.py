@@ -59,9 +59,9 @@ def main():
         carts.append(Cart((x, y), LEFT))
       elif lines[y][x] == '>':
         carts.append(Cart((x, y), RIGHT))
-  # Part 1
-  #print first_collision(tracks, carts)
-  # Part 2
+  print "Part 1"
+  print first_collision(tracks, carts)
+  print "Part 2"
   print last_standing(tracks, carts)
 
 def last_standing(tracks, carts):

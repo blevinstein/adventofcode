@@ -15,11 +15,13 @@ def main():
   ip_register = parse_directive(lines[0])
   instructions = map(parse_instruction, lines[1:])
 
-  # Part 1
-  state = [0] * 6
-  # Part 2
-  #state = [1] + [0] * 5
+  print "Part 1"
+  run([0] * 6, instructions, ip_register)
+  print "Part 2"
+  run([1] + [0] * 5, instructions, ip_register)
 
+def run(initial_state, instructions, ip_register):
+  state = initial_state
   ip = 0
   steps = 0
   while ip >= 0 and ip < len(instructions):

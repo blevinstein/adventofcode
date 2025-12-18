@@ -1,14 +1,16 @@
 
 def main():
-  # Part 1
+  print "Part 1"
   #print max(marble_game(10, 1618))
   #print max(marble_game(13, 7999))
   #print max(marble_game(30, 5807))
   #print max(marble_game(441, 71032))
-  # Part 2
+  print max(marble_game(413, 71082))
+  #print "Part 2"
   #print max(marble_game_2(9, 25))
   #print max(marble_game_2(30, 5807))
-  print max(marble_game(441, 7103200))
+  #print max(marble_game(441, 7103200))
+  #print max(marble_game(413, 7108200))
 
 class Node:
   def __init__(self, value, prev, next):

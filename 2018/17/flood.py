@@ -21,9 +21,9 @@ def main():
   #water, visited = set([]), set([])
   water, visited = fill(clay)
   show(clay, water, visited)
-  # Part 1
+  print "Part 1"
   print len(water | visited)
-  # Part 2
+  print "Part 2"
   print len(water)
 
 def check(clay):

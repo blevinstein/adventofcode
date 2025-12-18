@@ -17,7 +17,7 @@ def main():
         map[(x, y)] = CLEAR
       else:
         raise Exception('bad state: %s' % state)
-  # Part 1
+  print "Part 1"
   final_map = evolve(map, 1000000000)
   print show(final_map)
   print len([m for m in final_map if final_map[m] == LUMBERYARD]) * len([m for m in final_map if

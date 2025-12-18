@@ -5,9 +5,9 @@ def main():
   with open('input.txt', 'r') as f:
     lines = f.readlines()
   coords = [tuple(map(int, line.split(', '))) for line in lines]
-  # Part 1
-  #print biggest_finite_voronoi_region(coords)
-  # Part 2
+  print "Part 1"
+  print biggest_finite_voronoi_region(coords)
+  print "Part 2"
   print size_of_central_region(coords, 10000)
 
 def size_of_central_region(coords, max_dist):

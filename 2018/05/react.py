@@ -3,9 +3,9 @@ def main():
   with open('input.txt', 'r') as f:
     lines = f.readlines()
   input = lines[0].strip()
-  # Part 1
-  #print len(react(input))
-  # Part 2
+  print "Part 1"
+  print len(react(input))
+  print "Part 2"
   print min(len(react(input.replace(letter.upper(), '').replace(letter.lower(), '')))
       for letter in 'abcdefghijklmnopqrstuvwxyz')
 

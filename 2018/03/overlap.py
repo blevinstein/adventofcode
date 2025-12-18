@@ -100,18 +100,20 @@ def main():
       if a.overlaps(b):
         overlapping_patches.add(a)
         overlapping_patches.add(b)
+
   print([x for x in patches if not x in overlapping_patches])
-  #print('Overlapping...')
-  #overlaps = []
-  #for a in patches:
-  #  for b in patches:
-  #    if a.id >= b.id:
-  #      continue
-  #    if a.overlaps(b):
-  #      overlaps.append(a.intersect(b))
-  #print('Adding up...')
-  #unique_overlaps = union_all(overlaps)
-  #print(sum(p.area() for p in unique_overlaps))
+
+  print('Overlapping...')
+  overlaps = []
+  for a in patches:
+    for b in patches:
+      if a.id >= b.id:
+        continue
+      if a.overlaps(b):
+        overlaps.append(a.intersect(b))
+  print('Adding up...')
+  unique_overlaps = union_all(overlaps)
+  print(sum(p.area() for p in unique_overlaps))
 
 def dedupe_patches(all_patches):
   unique_patches = []

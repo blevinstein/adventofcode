@@ -9,7 +9,9 @@ def main():
   paths = all_paths(regex)
   graph = make_graph(paths)
   show(graph)
-  #print max(shortest_path_len(graph, g, (0, 0)) for g in graph)
+  print "Part 1"
+  print max(shortest_path_len(graph, g, (0, 0)) for g in graph)
+  print "Part 2"
   #print longest_path_len(graph, (0, 0))
   print paths_at_least(graph, (0, 0), 1000)
 

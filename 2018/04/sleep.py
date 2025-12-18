@@ -1,5 +1,4 @@
 import re
-from enum import Enum
 
 LINE_PATTERN = re.compile('^\\[(\d+-\d+-\d+) (\d+):(\d+)\] ([\w\d\s#]+)\n')
 SHIFT_START = re.compile('Guard #(\d+) begins shift')
@@ -60,12 +59,14 @@ def main():
       sleeps[active_guard].append((sleep_start, event.minute))
     else:
       raise Exception('bad instruction')
-  # Part 1
-  #minutes_asleep = {guard: sum(end - start for (start,end) in sleeps[guard]) for guard in sleeps}
-  #most_asleep = max(all_guards, key=lambda g: minutes_asleep[g])
-  #time_most_asleep = max(range(0,60), key=lambda m: sum(1 for (start,end) in sleeps[most_asleep]
-  #    if start <= m and m < end))
-  #print time_most_asleep * most_asleep
+  print "Part 1"
+  minutes_asleep = {guard: sum(end - start for (start,end) in sleeps[guard]) for guard in sleeps}
+  most_asleep = max(all_guards, key=lambda g: minutes_asleep[g])
+  time_most_asleep = max(range(0,60), key=lambda m: sum(1 for (start,end) in sleeps[most_asleep]
+      if start <= m and m < end))
+  print time_most_asleep * most_asleep
+
+  print "Part 2"
   all_options = [(guard, min) for guard in all_guards for min in range(0,60)]
   chosen_option = max(all_options, key=lambda (g,m): sum(1 for (start,end) in sleeps[g] if start <=
     m and m < end))

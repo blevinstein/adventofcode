@@ -5,9 +5,9 @@ def main():
   length, tree = build_tree(values)
   if length != len(values):
     raise Exception('Failed to traverse all values')
-  # Part 1
-  #print total_metadata(tree)
-  # Part 2
+  print "Part 1"
+  print total_metadata(tree)
+  print "Part 2"
   print tree.value()
 
 class Node:

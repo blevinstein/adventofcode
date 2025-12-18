@@ -36,11 +36,11 @@ def main():
   samples = map(parse_sample, sample_data.strip().split('\n\n'))
   instructions = map(parse_instruction, instruction_data.strip().split('\n'))
 
-  # Part 1
+  print "Part 1"
   print sum(1
       for sample in samples if len(possible_opcodes(sample[0], sample[1][1:], sample[2])) >= 3)
 
-  # Part 2
+  print "Part 2"
   opcode_map = {}
   for i in xrange(16):
     opcode_map[i] = set(OPCODE_NAMES)

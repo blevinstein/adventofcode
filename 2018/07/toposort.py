@@ -12,9 +12,9 @@ def main():
     deps[match.group(2)] = deps.get(match.group(2), []) + [match.group(1)]
     steps.add(match.group(1))
     steps.add(match.group(2))
-  # Part 1
-  #print topo_sort(steps, deps)
-  # Part 2
+  print "Part 1"
+  print topo_sort(steps, deps)
+  print "Part 2"
   print parallel_duration(steps, deps, 5)
 
 def parallel_duration(steps, deps, num_workers):

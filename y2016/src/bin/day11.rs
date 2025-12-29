@@ -13,7 +13,7 @@ enum MagicType {
 #[derive(Debug,Eq,PartialEq,Hash,Clone,Ord,PartialOrd)]
 struct MagicObject {
   magicType: MagicType,
-  element: String,
+  element: usize,
 }
 
 #[derive(Debug,Clone,Hash,Eq,PartialEq)]
@@ -112,7 +112,8 @@ fn main() {
   let object_re = Regex::new(r"a (\w+)(-compatible microchip| generator)").unwrap();
   let and_re = Regex::new(r"(, | and )").unwrap();
 
-  let input: Vec<Vec<MagicObject>> = raw_input.trim().split("\n")
+  // First, parse with String elements
+  let input_with_strings: Vec<Vec<(MagicType, String)>> = raw_input.trim().split("\n")
       .map(|line| {
         let (_, contents) = line.split_once(" contains ").unwrap();
         if contents == "nothing relevant." {
@@ -120,15 +121,10 @@ fn main() {
         } else {
           and_re.split(contents).map(|object_raw| {
             let captures = object_re.captures(object_raw).expect("Failed to match regex");
+            let element = captures[1].to_string();
             match &captures[2] {
-              "-compatible microchip" => MagicObject {
-                magicType: MagicType::Microchip,
-                element: captures[1].to_string()
-              },
-              " generator" => MagicObject {
-                magicType: MagicType::Generator,
-                element: captures[1].to_string()
-              },
+              "-compatible microchip" => (MagicType::Microchip, element),
+              " generator" => (MagicType::Generator, element),
               _ => panic!("Unexpected type string"),
             }
           }).collect()
@@ -136,13 +132,38 @@ fn main() {
       })
       .collect();
 
+  // Build element library (including elerium and dilithium for part 2)
+  let mut element_library: Vec<String> = input_with_strings
+      .iter()
+      .flat_map(|floor| floor.iter().map(|(_, element)| element.clone()))
+      .collect();
+  element_library.push("elerium".to_string());
+  element_library.push("dilithium".to_string());
+
+  // Convert to usize indices
+  let input: Vec<Vec<MagicObject>> = input_with_strings
+      .iter()
+      .map(|floor| {
+        floor.iter().map(|(magic_type, element)| {
+          let element_idx = element_library.iter().position(|e| e == element).unwrap();
+          MagicObject {
+            magicType: magic_type.clone(),
+            element: element_idx,
+          }
+        }).collect()
+      })
+      .collect();
+
+  let elerium_idx = element_library.iter().position(|e| e == "elerium").unwrap();
+  let dilithium_idx = element_library.iter().position(|e| e == "dilithium").unwrap();
+
   println!("part 1: {} steps", min_steps(&MagicState { objects: input.clone(), elevator: 0 }));
 
   let mut initial_state_part2 = MagicState { objects: input.clone(), elevator: 0 };
-  initial_state_part2.objects[0].push(MagicObject { magicType: MagicType::Generator, element: "elerium".to_string() });
-  initial_state_part2.objects[0].push(MagicObject { magicType: MagicType::Microchip, element: "elerium".to_string() });
-  initial_state_part2.objects[0].push(MagicObject { magicType: MagicType::Generator, element: "dilithium".to_string() });
-  initial_state_part2.objects[0].push(MagicObject { magicType: MagicType::Microchip, element: "dilithium".to_string() });
+  initial_state_part2.objects[0].push(MagicObject { magicType: MagicType::Generator, element: elerium_idx });
+  initial_state_part2.objects[0].push(MagicObject { magicType: MagicType::Microchip, element: elerium_idx });
+  initial_state_part2.objects[0].push(MagicObject { magicType: MagicType::Generator, element: dilithium_idx });
+  initial_state_part2.objects[0].push(MagicObject { magicType: MagicType::Microchip, element: dilithium_idx });
 
   println!("part 2: {} steps", min_steps(&initial_state_part2));
 }

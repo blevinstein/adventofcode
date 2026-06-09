@@ -31,3 +31,5 @@ Each year has its own directory containing daily puzzle solutions:
 ## 🎅 About
 
 These are my personal solutions written while learning and having fun with the puzzles. Happy Holidays! ☃️
+
+Note to self: Consider using Gleam for 2026?
